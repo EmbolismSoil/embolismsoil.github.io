@@ -32,11 +32,11 @@ about:
 
 # ========== Site ========== #
 # title of the site
-SEO_title: 兰溪
+SEO_title: 
 # main title
-main_title: 兰溪
+main_title: 
 # subtitle
-subtitle: 君子和而不同
+subtitle: 
 # site haeder image
 site_header_image: '/intro/bg-3.jpg'
 # post haeder image
