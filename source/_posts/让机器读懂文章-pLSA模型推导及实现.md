@@ -1,6 +1,6 @@
 ---
 title: 让机器读懂文章-pLSA模型推导及实现
-date: 2018-05-03 15:40:40
+date: 2019-07-12 02:09:57
 tags: [自然语言处理, 算法, 机器学习]
 mathjax: true
 categories:
