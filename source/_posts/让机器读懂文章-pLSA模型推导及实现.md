@@ -1,7 +1,7 @@
 ---
 title: 让机器读懂文章-pLSA模型推导及实现
 date: 2018-05-03 15:40:40
-tags: [自然语言处理]
+tags: [自然语言处理, 算法, 机器学习]
 mathjax: true
 categories:
     - 自然语言处理
@@ -36,7 +36,8 @@ categories:
 
 这个模型可以用plate notation更加简洁地描述：
 
-![pLSA模型](https://img-blog.csdnimg.cn/20181230011214553.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTMyOTgzMDA=,size_16,color_FFFFFF,t_70#pic_center)
+![pLSA模型](plsa.png)
+
 图中的阴影部分的变量$d$和$w$对应着文章和文章的所有词，表示可观测的变量，$z$是观测不到的主题，我们称之为隐变量，两个框框左下角的$N$和$M$则分别表示$N$和$M$词独立重复试验。这个图所表达的文章生成过程跟上面的文字表述是一致的。
 
 这样写文章的模型是符合直觉的，但仔细推敲总觉得过于机械生硬，这样的机械式过程能写得出朱先生《背影》那样优秀的文章吗? 
