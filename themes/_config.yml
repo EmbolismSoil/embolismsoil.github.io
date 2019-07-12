@@ -4,9 +4,9 @@
 
 # Head info
 head:
-    favicon: "/img/favicon.png"
-    high_res_favicon: "/img/favicon.png"
-    apple_touch_icon: "/img/favicon.png"
+    favicon: "/img/favicon.jpg"
+    high_res_favicon: "/img/favicon.ico"
+    apple_touch_icon: "/img/favicon.ico"
     keywords:
     site_verification:
         google:
@@ -18,7 +18,7 @@ head:
 
 # Jump Links Settings
 url:
-    rss:
+    rss: 
     daily_pic: "#"
     logo: "#"
 
@@ -33,7 +33,7 @@ scheme: Paradox
 
 # UI & UX: slogan, color, effect
 uiux:
-    slogan: "Hi, nice to meet you"
+    slogan: "君子和而不同"
     theme_color: "#0097A7"
     theme_sub_color: "#00838F"
     hyperlink_color: "#00838F"
@@ -45,7 +45,7 @@ uiux:
 # JS Effect Switches
 js_effect:
     fade: true
-    smoothscroll: false
+    smoothscroll: true 
 
 # Reading experience
 reading:
@@ -65,13 +65,13 @@ background:
     purecolor: "#F5F5F5"
     #bgimg: "/img/bg.png"
     bing:
-        enable: false
+        enable: false 
         parameter:
 
 # Images Settings
 img:
     logo: "/img/logo.png"
-    avatar: "/img/avatar.png"
+    avatar: "/img/avatar.jpg"
     daily_pic: "/img/daily_pic.png"
     sidebar_header: "/img/sidebar_header.png"
     random_thumbnail: "/img/random/material-"
@@ -157,28 +157,28 @@ toc:
 
 # SNS Menu
 sns:
-    email: youremail@email.com
-    facebook: "https://www.facebook.com/facebook"
-    twitter: "https://twitter.com/twitter"
-    googleplus: "https://www.google.com/"
+    email: 743703241@qq.com
+    facebook: 
+    twitter: 
+    googleplus: 
     weibo:
     instagram:
     tumblr:
-    github:
+    github: https://github.com/EmbolismSoil
     linkedin:
-    zhihu:
+    zhihu: https://www.zhihu.com/people/li-brooks/activities
     bilibili:
     telegram:
     v2ex:
 
 # SNS Share Switch
 sns_share:
+    weibo: true
+    qq: true
     twitter: true
     facebook: true
-    googleplus: true
-    weibo: true
+    googleplus: false
     linkedin: false
-    qq: false
     telegram: false
 
 # Sidebar Customize
@@ -196,7 +196,7 @@ sidebar:
         icon: inbox
         divider: false
     categories:
-        use: false
+        use: true
         icon: chrome_reader_mode
         divider: false
     pages:
@@ -205,7 +205,7 @@ sidebar:
             #icon: person
             #divider: false
     article_num:
-        use: false
+        use: true
         divider: false
     footer:
         divider: true
@@ -273,9 +273,9 @@ leancloud:
 
 # Busuanzi 不蒜子 Views
 busuanzi:
-    enable: false
-    all_site_uv: false
-    post_pv: false
+    enable: true 
+    all_site_uv: true
+    post_pv: true
     busuanzi_pure_mini_js: "https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"
 
 # Files Vendors
@@ -300,7 +300,7 @@ vendors:
     # FontAwesome 4.5.0
     fontawesome:
     # MathJax 2.7.0-2.7.1
-    mathjax:
+    mathjax: https://cdn.bootcss.com/mathjax/2.7.0/MathJax.js
     # Prettify r298 (only prettify.js)
     prettify:
     # Material Icons 3.0.1

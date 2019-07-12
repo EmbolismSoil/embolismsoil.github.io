@@ -1,12 +1,9 @@
 ---
 title: svm优化问题的导出
 date: 2019-07-12 01:53:57
-tags: 
-    - 机器学习
+tags: [机器学习, 算法]
 mathjax: true
-categories:
-    - 机器学习
-    - 算法
+categories: [机器学习]
 ---
 
 # SVM - 优化问题的导出

@@ -4,9 +4,9 @@
 
 # Head info
 head:
-    favicon: "/img/favicon.jpg"
-    high_res_favicon: "/img/favicon.ico"
-    apple_touch_icon: "/img/favicon.ico"
+    favicon: "/img/favicon.png"
+    high_res_favicon: "/img/favicon.png"
+    apple_touch_icon: "/img/favicon.png"
     keywords:
     site_verification:
         google:
@@ -18,7 +18,7 @@ head:
 
 # Jump Links Settings
 url:
-    rss: 
+    rss:
     daily_pic: "#"
     logo: "#"
 
@@ -45,7 +45,7 @@ uiux:
 # JS Effect Switches
 js_effect:
     fade: true
-    smoothscroll: true 
+    smoothscroll: false
 
 # Reading experience
 reading:
@@ -65,13 +65,13 @@ background:
     purecolor: "#F5F5F5"
     #bgimg: "/img/bg.png"
     bing:
-        enable: false 
+        enable: false
         parameter:
 
 # Images Settings
 img:
     logo: "/img/logo.png"
-    avatar: "/img/avatar.jpg"
+    avatar: "/img/avatar.png"
     daily_pic: "/img/daily_pic.png"
     sidebar_header: "/img/sidebar_header.png"
     random_thumbnail: "/img/random/material-"
@@ -122,7 +122,7 @@ qrcode:
 #    Prettify
 #        theme: # Available value in /source/css/prettify/[theme].min.css
 prettify:
-    enable: true
+    enable: false
     theme: "github-v2"
 
 #    Hanabi (https://github.com/egoist/hanabi)
@@ -161,24 +161,24 @@ sns:
     facebook: 
     twitter: 
     googleplus: 
-    weibo:
+    weibo: https://weibo.com/u/2178628847
     instagram:
     tumblr:
     github: https://github.com/EmbolismSoil
     linkedin:
-    zhihu: https://www.zhihu.com/people/li-brooks/activities
+    zhihu:
     bilibili:
     telegram:
     v2ex:
 
 # SNS Share Switch
 sns_share:
-    weibo: true
-    qq: true
     twitter: true
     facebook: true
-    googleplus: false
+    googleplus: true
+    weibo: true
     linkedin: false
+    qq: true
     telegram: false
 
 # Sidebar Customize
@@ -273,7 +273,7 @@ leancloud:
 
 # Busuanzi 不蒜子 Views
 busuanzi:
-    enable: true 
+    enable: true
     all_site_uv: true
     post_pv: true
     busuanzi_pure_mini_js: "https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"

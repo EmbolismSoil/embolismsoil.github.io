@@ -1,14 +1,9 @@
 ---
 title: 在Qt中实现数字音频均衡器
 date: 2019-07-12 01:06:56
-tags: 
-    - C++
-    - Qt
-    - 音频算法
+tags: [C++, Qt, 音频算法]
 mathjax: true
-categories:
-    - C++
-    - 算法
+categories: [Qt]
 ---
 
 # Qt实现数字音频均衡器
