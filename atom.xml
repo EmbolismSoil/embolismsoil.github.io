@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://embolismsoil.github.io/"/>
-  <updated>2019-07-21T07:31:47.573Z</updated>
+  <updated>2019-08-24T11:44:15.262Z</updated>
   <id>https://embolismsoil.github.io/</id>
   
   <author>
@@ -17,11 +17,40 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>TRPO:使策略梯度单调递增的杀器</title>
+    <link href="https://embolismsoil.github.io/2019/08/24/TRPO-%E4%BD%BF%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E5%8D%95%E8%B0%83%E9%80%92%E5%A2%9E%E7%9A%84%E6%9D%80%E5%99%A8/"/>
+    <id>https://embolismsoil.github.io/2019/08/24/TRPO-使策略梯度单调递增的杀器/</id>
+    <published>2019-08-24T11:44:15.000Z</published>
+    <updated>2019-08-24T11:44:15.262Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="从Q-learning到策略梯度"><a href="#从Q-learning到策略梯度" class="headerlink" title="从Q learning到策略梯度"></a>从Q learning到策略梯度</h2><p>在解决<code>MDP</code>问题的算法中，<code>Value Base</code>类算法的思路将关注点放在价值函数上，传统的<code>Q Learning</code>等算法是一个很好的例子。<code>Q Learning</code>通过与环境的交互，不断学习逼近<code>(状态, 行为)</code>价值函数$Q(s_t, a_t)$，而策略本身即选取使得在特定状态下价值函数最大的动作，即$a_t = \mathop{\arg\min}_{a}Q(s_t, a)$ ， 具体算法如图1所示。</p><p><img src="C:\Users\Conley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs\home\conley\github\embolismsoil.github.io\source\_posts\TRPO-使策略梯度单调递增的杀器\1566647970040.png" alt="Q Learning算法"></p><p>其中$Q(S, A) \leftarrow Q(S, A)+\alpha\left[R+\gamma \max _{a} Q\left(S^{\prime}, a\right)-Q(S, A)\right]$一步即时序差分法的价值函数逼近过程，具体原理详见。</p><p>Q learning算法已经能解决许多问题，但最致命的一点是: 在确定环境$s_t$下，策略选择的行动总是确定的，这对于很多场景来说，并不适用。例如玩剪刀石头布的时候，如果出拳的策略是一定的话，就很容易被对手察觉并击破。同时，Q learning也无法解决状态重名的问题。具体地说，状态重名是指在两个现实中的状态，在建模中表现出来的<code>state</code>是一样的，也就是$s_t$向量的每个维度都相等。如下图中格子世界的例子，如果状态被建模成二维向量，维度分别表示左右是否有墙阻挡，那么图中两个灰色格子的状态向量是一样的，于是他们在Q learning中学习到的策略会选择一样的行动，但矛盾的是: <strong>如果选择向左走，对于第一个格子就是一次失败的决策。如果选择向右走，对于第二个格子来说就是一次失败的决策</strong>。特别是如果使用$\epsilon-greedy$策略时，很可能在第一个灰格子会不停选择向左的行动，直到一次$\epsilon$概率的事件发生时，才有可能选择一次随机行为，从而有机会跳出这个坏处境。这时候还不如直接使用随机策略管用。</p><p><img src="C:\Users\Conley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs\home\conley\github\embolismsoil.github.io\source\_posts\TRPO-使策略梯度单调递增的杀器\1566648579995.png" alt="格子世界"></p><p>针对上述种种缺点，策略梯度法应运而生。</p><p>首先，我们需要明确的是，强化学习的最终目的是最大化价值函数。Q learning算法的思路比较绕，Q learning并没有直接去最大化价值函数，而是思考: 在给定状态$s_t$下，做出动作$a_t$会得到什么样的回报？ 得到答案之后，每次都贪婪地选择回报最大的那个动作。 可是为什么我们不直接思考: 在给定状态下，做出什么样的动作，才能让回报最大化？ 策略梯度就是这样一个直接的算法。</p><p>具体地说，策略梯度算法将策略建模成为$\pi_{\theta}(s,a)$，表示在$s$状态下选择$a$动作的概率，其中$\theta$为参数。并且将负回报函数作为损失函数，应用梯度下降法将期望奖励最大化。定义为</p><script type="math/tex; mode=display">J(\theta)=\sum_{s} d(s) \sum_{a} \pi_{\theta}(s, a) \mathcal{R}(s,a) \tag{1}</script><p>这样，(1)式对参数$\theta$求梯度得到</p><script type="math/tex; mode=display">\begin{aligned} \nabla_{\theta} J(\theta) &=\sum_{\mathbf{s} \in S} d(s) \sum_{a \in A} \pi_{\theta}(s, a) \nabla_{\theta} \log \pi_{\theta}(s, a) \mathcal{R}_{s, a} \\ &=\mathbb{E}_{\pi_{\theta}}\left[\nabla_{\theta} \log \pi_{\theta}(s, a) \mathcal{R}(s,a)\right] \end{aligned}  \tag{2}</script><p>式子(2)的期望通过均值代替得到</p><script type="math/tex; mode=display">\nabla_{\theta}J(\theta)=\frac{1}{N}\sum{\nabla_{\theta}\log\pi_{\theta}(s, a)\mathcal{R}(s,a)} \tag{3}</script><p>于是我们得到了蒙特卡洛策略梯度算法</p><p><img src="C:\Users\Conley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs\home\conley\github\embolismsoil.github.io\source\_posts\TRPO-使策略梯度单调递增的杀器\1566661134557.png" alt="蒙特卡洛策略梯度"></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;从Q-learning到策略梯度&quot;&gt;&lt;a href=&quot;#从Q-learning到策略梯度&quot; class=&quot;headerlink&quot; title=&quot;从Q learning到策略梯度&quot;&gt;&lt;/a&gt;从Q learning到策略梯度&lt;/h2&gt;&lt;p&gt;在解决&lt;code&gt;MDP&lt;/
+      
+    
+    </summary>
+    
+      <category term="强化学习" scheme="https://embolismsoil.github.io/categories/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+      <category term="算法" scheme="https://embolismsoil.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="机器学习" scheme="https://embolismsoil.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+      <category term="计算广告" scheme="https://embolismsoil.github.io/tags/%E8%AE%A1%E7%AE%97%E5%B9%BF%E5%91%8A/"/>
+    
+  </entry>
+  
+  <entry>
     <title>拍卖与博弈：计算广告中的底价问题</title>
     <link href="https://embolismsoil.github.io/2019/07/21/%E6%8B%8D%E5%8D%96%E4%B8%8E%E5%8D%9A%E5%BC%88-%E8%AE%A1%E7%AE%97%E5%B9%BF%E5%91%8A%E4%B8%AD%E7%9A%84%E5%BA%95%E4%BB%B7%E9%97%AE%E9%A2%98/"/>
     <id>https://embolismsoil.github.io/2019/07/21/拍卖与博弈-计算广告中的底价问题/</id>
     <published>2019-07-21T05:19:46.000Z</published>
-    <updated>2019-07-21T07:31:47.573Z</updated>
+    <updated>2019-08-24T11:42:10.027Z</updated>
     
     <content type="html"><![CDATA[<h2 id="流量交易"><a href="#流量交易" class="headerlink" title="流量交易"></a>流量交易</h2><p>现代计算广告中，最广泛的流量交易模式为实时竞价模式，即Real-Time-Bidding(RTB)。实时竞价顾名思义，就是在流量到达时被放到交易市场进行公开的，实时的竞拍，参与竞拍的广告主赢得竞拍后，即可获得对这个流量的投放权，整个流程如图示。</p><p><img src="https://blog.fyber.com/wp-content/uploads/2015/02/RTB_Infographic.png" alt="RTB系统示意图"></p><p>以新浪微博的信息流广告为例，当我们刷微博时，微博的信息流(或者timeline)中会夹杂着广告，假设微博将信息流的第4和第10位作为广告位，那么每次你刷新微博后，list中的第4和第10条微博总会是推广(广告)微博。于是当用户A进入微博的信息流界面时，除了从服务器请求微博内容之外，还会同时向RTB请求广告内容，这个请求称之为曝光请求。RTB接受到该曝光请求后，将此次曝光放入流量市场进行实时拍卖，诸多广告主的投放系统(DSP)接到拍卖的事件后，立即对该曝光请求进行出价，一般来说根据曝光质量和属性不同，各个广告主对其出价也不尽相同。例如信息流第4位的曝光出价就比信息流第10位出价高，因为排在前面的广告更能引起用户注意，再如篮球鞋销售商对男性微博用户的曝光请求出价要比女性微博用户的曝光出价要高，因为篮球鞋的受众群体主要是男性。在广告主出价完成后，RTB则向出价最高的广告主请求广告内容，并且将此内容返回到微博客户端，于是用户在刷微博时就看到了这个广告，完成了一次广告曝光。这整个请求、竞价、返回广告的过程会在毫秒级别内完成。</p><h2 id="第二高价和底价问题"><a href="#第二高价和底价问题" class="headerlink" title="第二高价和底价问题"></a>第二高价和底价问题</h2><p>在RTB的流量竞拍中是按照<strong>第二高价</strong>来计费的，这意味着如果第$t$次曝光n个广告主对其出价分别为$b_1(t),b_2(t),b_3(t),…,b_n(t)$，且有$b_1(t)&gt;b_2(t)&gt;b_3(t)&gt;…&gt;b_n(t)$，那么广告主1竞价胜出，但是媒体方只会向广告主1收费$b_2$元。这种计费方式主要可以让广告主失去调价的动力，否则在广告主竞价胜出之后，会立即调低出价，以期望使用更低的价格拿到曝光，从而提高自身收益。但是从媒体方的角度来说，第二高价的机制存在着$\delta = b_1(t)-b_2(t)$的利润空间没有充分利用，于是引出了底价机制。底价机制指的是RTB在竞价拍卖的过程中，设置一个最低价格$\alpha$, 称之为底价。当$b_1(t)&lt;\alpha$时则RTB则拒绝售卖该流量，或者将流量导入其它交易市场售卖。当$b_1(t) \ge \alpha&gt;b_2(t)$时，按照$\alpha$向胜出的广告主收费，当$b_2(t) \ge \alpha$时，则按照$b_2(t)$向胜出的广告主收费。总结起来，在第$t$次竞价中，向竞价胜出的广告主收费$r(t)$如式(1)所示。</p><script type="math/tex; mode=display">r(t)=\left\{\begin{array}{ll}{\alpha,} & {b_{1}(t) \geq \alpha>b_{2}(t)} \\ {b_{2}(t),} & {b_{2}(t) \geq \alpha} \\ {0,} & {\alpha>b_{1}(t)}\end{array}\right. \tag{1}</script><p>从$r(t)$的表达式中可以看到，当满足$b_1(t) \ge \alpha &gt; b_2(t)$时，媒体放可以比原来的纯二价计费方式多赚$\beta(t)=\alpha-b_2(t)$，但也要注意到当$\alpha &gt; b_1(t)$时也存在损失$b_2(t)$的风险。于是一个很自然的想法就是：</p><blockquote><p>让$\alpha$能自动调整，让$\alpha$在$b_1(t)$较大时，$\alpha$也能随之增大，反之则减小。 — 原则[1]</p></blockquote><p>这就是动态底价的概念，我们重新把这个可以变化的底价定义为$\alpha(t)$，表示在第$t$次竞价中的底价。式子(1)重新表述为式(2)。</p><script type="math/tex; mode=display">r^{\prime}(t)=\left\{\begin{array}{ll}{\alpha(t),} & {b_{1}(t) \geq \alpha(t)>b_{2}(t)} \\ {b_{2}(t),} & {b_{2}(t) \geq \alpha(t)} \\ {0,} & {\alpha(t)>b_{1}(t)}\end{array}\right. \tag{2}</script><p>目前动态底价的算法主要有三种:</p><ol><li>基于贝叶斯推断的底价估计算法</li><li>基于均值统计的底价估计算法</li><li>基于经验的One-Shot底价调整算法</li></ol><p>下面逐一介绍这三个算法。</p><h2 id="基于贝叶斯推断的底价估计算法"><a href="#基于贝叶斯推断的底价估计算法" class="headerlink" title="基于贝叶斯推断的底价估计算法"></a>基于贝叶斯推断的底价估计算法</h2><p>该算法首先假设在一次RTB竞价的过程中，最高出价$B_1$为满足对数高斯分布的随机变量，并且假设其方差已知(可以当成超参数来调)，而其均值的先验分布为高斯分布，即:</p><script type="math/tex; mode=display">\begin{aligned} B_{1} & \sim \operatorname{lognorm}\left(\mu, \sigma^{2}\right) \\ \mu(t) & \sim \mathcal{N}\left(\theta(t), \delta^{2}(t)\right) \end{aligned} \tag{3}</script><p>假设$\mu(t)$的分布在系统上线前已经由历史时刻$[0,t]$的数据拟合得到了$\theta(t)$和$\delta^2(t)$，当系统在线运行时，$t+1$竞拍结束后得到一个最高出价的样本$b_1(t+1)$，这样由于对数高斯分布和高斯分布为共轭分布，可以直接后验分布</p><script type="math/tex; mode=display">\begin{aligned}    p(\theta(t) | b_1(t+1))=\mathcal{N}\left(\theta(t+1) | \theta(t), \delta^{2}(t)\right)\end{aligned} \tag{4}</script><p>其中</p><script type="math/tex; mode=display">\begin{aligned} \theta(t+1) &=\frac{\theta(t) \delta^{2}(t)+\sigma^{2} b_{1}(t+1)}{\sigma^{2}+\delta^{2}(t)} \\ \delta^{2}(t+1) &=\frac{\delta^{2}(t) \sigma^{2}}{\sigma^{2}+\delta^{2}(t)} \end{aligned} \tag{5}</script><p>这样根据最大后验估计的原则，我们可以使用$\theta(t)$来作为$\mu$的估计，并且根据式(3)可知，可以将$log(\theta(t))$作为对$B_1$的估计。根据原则[1], 只要简单地设置:</p><script type="math/tex; mode=display">\alpha(t+1) = log(\theta(t+1)) \tag{6}</script><p>可以看到基于贝叶斯推断的方法首先估计了$b_1(t+1)$，然后通过设置$\alpha(t+1)$逼近$b_1(t+1)$的方式来最大化本次曝光的收益。</p><h2 id="基于均值统计的底价估计算法"><a href="#基于均值统计的底价估计算法" class="headerlink" title="基于均值统计的底价估计算法"></a>基于均值统计的底价估计算法</h2><p>均值估计的想法其实十分朴素：<strong>本次曝光的收益应当不低于历史平均收益</strong>。于是很直接的，使用$t-1$时刻的历史平均收益来作为$\alpha(t)$的估计：</p><script type="math/tex; mode=display">\alpha(t)=\frac{1}{M} \sum_{i=t-M}^{t-1} r(i) \tag{7}</script><p>当然，线上系统的运行环境是会发生改变的，比如说流量分布，竞争环境，等等。所以收益分布应当也不是一个静态的分布，并且当样本越靠近当前时刻，则越有可能采样于当前的收益分布，所以计算平均收益时，应当使用加权平均的方式来进行，并且设置离当前时刻越近的数据，权重就越高:</p><script type="math/tex; mode=display">\alpha(t)=\frac{1}{M} \sum_{i=t-M}^{t-1} w(i, t) r(i) \tag{8}</script><p>其中$w(i,t)$的选择可以多种多样，只要满足<strong>当前时刻越近的数据，权重就越高</strong>的原则即可。</p><h2 id="ONE-SHOT底价调整算法"><a href="#ONE-SHOT底价调整算法" class="headerlink" title="ONE-SHOT底价调整算法"></a>ONE-SHOT底价调整算法</h2><p>ONE-SHOT其实是一个调整算法而不是一个估计算法。其工作的流程是:</p><ol><li>给定一个初始底价$\alpha(t)$</li><li>根据一定规则在$\alpha(t)$的基础上调整得到$\alpha(t+1)$</li></ol><p>初始底价可以根据经验直接指定，也可以通过式子(7)对历史数据统计给出。而调整的原则在于:</p><blockquote><p>当底价低于$b_1$时，则应当缓慢提高底价，当底价高于$b_1$时应当迅速降低底价  —原则[2]</p></blockquote><p>原则[2]提出的基本思想是：当底价低于$b_1$时，虽然此时收益并非是最大化的，但毕竟有$b_2$作为保证，收益不会太低，所以底价上涨探索最优的收费不必太过于急切，但如果底价高于$b1$时，收益将会直接变为0，所以需要快速降低底价，让$b_2$来保证收益。</p><p>根据原则[2]，当然可以设置固定的小步伐$s_u$和大步伐$s_l$来调整底价。但是为了平滑和鲁棒性，可以根据式(9)来执行调整过程。</p><script type="math/tex; mode=display">\left\{\begin{array}{ll}{\alpha(t+1)=\left(1-\epsilon^{t} \lambda_{h}\right) a(t)} & {\text { if } \alpha(t)>b_{1}(t)} \\ {\alpha(t+1)=\left(1+\epsilon^{t} \lambda_{e}\right) a(t)} & {\text { if } b_{1}(t) \geq \alpha(t) \geq b_{2}(t)} \\ {\alpha(t+1)=\left(1+\epsilon^{t} \lambda_{l}\right) \alpha(t)} & {\text { if } b_{2}(t)>\alpha(t)}\end{array}\right. \tag{9}</script><p>其中$\epsilon \in (0, 1]$且$\lambda_h, \lambda_e, \lambda_l \in [0, 1]$, $\epsilon$是一个时间衰减系数，如果RTB只希望在启动后个某个时间段调整底价，并且最终收敛，则可以通过这个参数来调整。而$\lambda_h$则用于调整当$\alpha(t) &gt; b_1(t)$时底价的降低速度。而同理$\lambda_l$用来调整当$\alpha(t) &lt; b_2(t)$时底价的提升速度。$\lambda_e$则用于调整探索最优收益的速度。从业务上来说，往往会设置$\lambda_h&gt;\lambda_l&gt;\lambda_e$,即当前收益越高，调整速度越慢，这与原则[2]的基本思想是一致的。</p><h2 id="其他讨论"><a href="#其他讨论" class="headerlink" title="其他讨论"></a>其他讨论</h2><p>上述三种底价算法里，基于贝叶斯推断的算法的数学理论是最完备的，但必须要考虑到这种算法存在<strong>最高出价符合对数高斯分布</strong>这个假设前提的。这个假设并非放之四海而皆准的，各个广告系统的业务不一样，符合的分布也不一样，需要选择合适的分布，才能做出好的效果。并且需要注意的是，该算法优化的是单次曝光收益，并没有从全局的视角来考虑底价问题，不一定在整体收益上是最高的。</p><p>基于统计均值的算法是最朴素的，也是最容易实现的，不失为一个短平快的解决方案，它应当作为任何动态底价第一版本的最好选择，至少你能有一个Baseline去观察你的系统，判断动态底价对于你的广告系统来说是否是必要的，是否真的能提升收入。</p><p>而ONE-SHOT算法虽然没有数学理论支撑，但它作为一种博弈思维的产物，有从业务和全局的视角去考虑底价问题，从直觉上来看是最值得尝试的一种。当然，我想ONE-SHOT算法应当还有许多改进的空间，比如$\lambda_h, \lambda_e,\lambda_l$参数的值可以跟贝叶斯推断来动态调整的值，也可以通过反馈控制的方法来动态调整。</p><p>但最终，无论如何，这里都没办法给哪一种算法的优劣性下一个断论，毕竟业务多种多样，只能认真做好A/B Test，好好调参，根据实际业务表现来选择算法了。</p>]]></content>
     
@@ -37,9 +66,9 @@
       <category term="计算广告" scheme="https://embolismsoil.github.io/categories/%E8%AE%A1%E7%AE%97%E5%B9%BF%E5%91%8A/"/>
     
     
-      <category term="机器学习" scheme="https://embolismsoil.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
       <category term="算法" scheme="https://embolismsoil.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="机器学习" scheme="https://embolismsoil.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
       <category term="计算广告" scheme="https://embolismsoil.github.io/tags/%E8%AE%A1%E7%AE%97%E5%B9%BF%E5%91%8A/"/>
     
@@ -66,9 +95,9 @@
       <category term="自然语言处理" scheme="https://embolismsoil.github.io/categories/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/"/>
     
     
-      <category term="机器学习" scheme="https://embolismsoil.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
       <category term="算法" scheme="https://embolismsoil.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="机器学习" scheme="https://embolismsoil.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
       <category term="自然语言处理" scheme="https://embolismsoil.github.io/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/"/>
     
@@ -97,9 +126,9 @@
       <category term="机器学习" scheme="https://embolismsoil.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
     
-      <category term="机器学习" scheme="https://embolismsoil.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
       <category term="算法" scheme="https://embolismsoil.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="机器学习" scheme="https://embolismsoil.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
   </entry>
   
