@@ -4,6 +4,7 @@ date: 2019-08-24 19:44:15
 tags: [算法, 机器学习, 计算广告]
 mathjax: true
 categories: [强化学习]
+
 ---
 
 
@@ -39,4 +40,3 @@ $$\nabla_{\theta}J(\theta)=\frac{1}{N}\sum{\nabla_{\theta}\log\pi_{\theta}(s, a)
 于是我们得到了蒙特卡洛策略梯度算法
 
 ![蒙特卡洛策略梯度](C:\Users\Conley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs\home\conley\github\embolismsoil.github.io\source\_posts\TRPO-使策略梯度单调递增的杀器\1566661134557.png)
-
