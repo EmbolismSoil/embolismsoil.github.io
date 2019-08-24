@@ -4,7 +4,7 @@ date: 2019-08-24 19:44:15
 tags: [算法, 机器学习, 计算广告]
 mathjax: true
 categories: [强化学习]
-
+typora-root-url: TRPO-使策略梯度单调递增的杀器
 ---
 
 
@@ -13,13 +13,13 @@ categories: [强化学习]
 
 在解决`MDP`问题的算法中，`Value Base`类算法的思路将关注点放在价值函数上，传统的`Q Learning`等算法是一个很好的例子。`Q Learning`通过与环境的交互，不断学习逼近`(状态, 行为)`价值函数$Q(s_t, a_t)$，而策略本身即选取使得在特定状态下价值函数最大的动作，即$a_t = \mathop{\arg\min}_{a}Q(s_t, a)$ ， 具体算法如图1所示。
 
-![Q Learning算法](C:\Users\Conley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs\home\conley\github\embolismsoil.github.io\source\_posts\TRPO-使策略梯度单调递增的杀器\1566647970040.png)
+![Q Learning算法](1566647970040.png)
 
 其中$Q(S, A) \leftarrow Q(S, A)+\alpha\left[R+\gamma \max _{a} Q\left(S^{\prime}, a\right)-Q(S, A)\right]$一步即时序差分法的价值函数逼近过程，具体原理详见。
 
 Q learning算法已经能解决许多问题，但最致命的一点是: 在确定环境$s_t$下，策略选择的行动总是确定的，这对于很多场景来说，并不适用。例如玩剪刀石头布的时候，如果出拳的策略是一定的话，就很容易被对手察觉并击破。同时，Q learning也无法解决状态重名的问题。具体地说，状态重名是指在两个现实中的状态，在建模中表现出来的`state`是一样的，也就是$s_t$向量的每个维度都相等。如下图中格子世界的例子，如果状态被建模成二维向量，维度分别表示左右是否有墙阻挡，那么图中两个灰色格子的状态向量是一样的，于是他们在Q learning中学习到的策略会选择一样的行动，但矛盾的是: **如果选择向左走，对于第一个格子就是一次失败的决策。如果选择向右走，对于第二个格子来说就是一次失败的决策**。特别是如果使用$\epsilon-greedy$策略时，很可能在第一个灰格子会不停选择向左的行动，直到一次$\epsilon$概率的事件发生时，才有可能选择一次随机行为，从而有机会跳出这个坏处境。这时候还不如直接使用随机策略管用。
 
-![格子世界](C:\Users\Conley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs\home\conley\github\embolismsoil.github.io\source\_posts\TRPO-使策略梯度单调递增的杀器\1566648579995.png)
+![格子世界](1566648579995.png)
 
 针对上述种种缺点，策略梯度法应运而生。
 
@@ -39,4 +39,4 @@ $$\nabla_{\theta}J(\theta)=\frac{1}{N}\sum{\nabla_{\theta}\log\pi_{\theta}(s, a)
 
 于是我们得到了蒙特卡洛策略梯度算法
 
-![蒙特卡洛策略梯度](C:\Users\Conley\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs\home\conley\github\embolismsoil.github.io\source\_posts\TRPO-使策略梯度单调递增的杀器\1566661134557.png)
+![蒙特卡洛策略梯度](1566661134557.png)
