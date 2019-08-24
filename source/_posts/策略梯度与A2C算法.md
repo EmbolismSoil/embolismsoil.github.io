@@ -81,7 +81,7 @@ $$\begin{aligned} & \sum_{s \in S}d^{\pi_{\theta}}(s) \sum_{a \in A} [\nabla_{\t
 
 $$\mathcal B(s) = \frac{\sum_{a \in A} [\nabla_{\theta}\log\pi_{\theta}(s,a)]^2Q(s,a)}{\sum_{a \in A} [\nabla_{\theta}\log\pi_{\theta}(s,a)]^2}  \tag{8}$$
 
-式(7)给出了使得方差最小时得$\mathcal B(s)$，但也可以看到其计算复杂度十分高。事实上我们可以在计算复杂度和噪声指标上做权衡。从式子(7)中其实我们可以看到只要$\mathcal B (s)$逼近$Q(s,a)$且与a无关，即可得到一个接近最优解得方案。可以非常直觉地想到取状态价值函数$V(s)=\mathbb E[G_{s,a}|s,a]$作为$\mathcal B(s)$，即
+式(7)给出了使得方差最小时得$\mathcal B(s)$，但也可以看到其计算复杂度十分高。事实上我们可以在计算复杂度和噪声指标上做权衡。从式子(7)中其实我们可以看到只要$\mathcal B (s)$逼近$Q(s,a)$且与a无关，即可得到一个接近最优解得方案。可以非常直觉地想到取状态价值函数$V(s)=\mathbb E[G_{s,a}|s]$作为$\mathcal B(s)$，即
 
 $$\mathcal B(s)=V(s) \tag{9}$$
 
